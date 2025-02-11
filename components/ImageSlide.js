@@ -1,9 +1,13 @@
 "use client"
 import { color } from 'framer-motion'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Slide } from 'react-slideshow-image'
 import 'react-slideshow-image/dist/styles.css'
 function ImageSlide() {
+    const [isClient, setIsClient] = useState(false)
+    useEffect(() => {
+        setIsClient(true);
+    }, [])
     const images = [
         "/men/bag.webp",
         "/men/Hoodies.webp",
@@ -18,47 +22,48 @@ function ImageSlide() {
         "/women/oversized.webp",
         "/women/shirt.webp"
     ]
-   
-    const style ={
+
+    const style = {
         textAlign: 'center',
         background: '#bbbaba',
         fontSize: '30px',
-        borderRadius:'5px'
+        borderRadius: '5px'
         // marginRight:'10px'
     }
-    const styleNomargin ={
+    const styleNomargin = {
         textAlign: 'center',
         background: '#bbbaba',
         padding: '200px 0',
         fontSize: '30px',
-        borderRadius:'5px',
-        marginRight:'0'
+        borderRadius: '5px',
+        marginRight: '0'
     }
     return (
-        <div className=' '>
-            <Slide slidesToScroll={1} slidesToShow={1} indicators={true} autoplay={true} duration={1000}    easing='ease-out' transitionDuration={2000} responsive={[{
-                breakpoint: 800,
-                settings: {
-                    slidesToShow: 4,
-                    slidesToScroll: 3
-                }
-            }, {
-                breakpoint: 500,
-                settings: {
-                    slidesToShow: 2,
-                    slidesToScroll: 2
-                }
-            }]}>
-                {images.map((image,i)=>{
-                    return(
-                        <div className='p-0 md:p-4' key={`image-${i}`}>
-                            <div className='bg-cover h-[25rem] w-80 rounded-md '  style={{backgroundImage: `url(/img${image})`}}></div>
+        <>
+         <Slide slidesToScroll={1} slidesToShow={1} indicators={true} autoplay={true} duration={1000} easing='ease-out' transitionDuration={2000} responsive={[{
+            breakpoint: 800,
+            settings: {
+                slidesToShow: 4,
+                slidesToScroll: 3
+            }
+        }, {
+            breakpoint: 500,
+            settings: {
+                slidesToShow: 2,
+                slidesToScroll: 2
+            }
+        }]}>
+            {images.map((image, i) => {
+                return (
+                    <div className='p-0 md:p-4' key={`image-${i}`}>
+                        <div className='bg-cover h-[25rem] w-80 rounded-md ' style={{ backgroundImage: `url(/img${image})` }}></div>
 
-                        </div>
-                    )
-                })}
-            </Slide>
-        </div>
+                    </div>
+                )
+            })}
+        </Slide>
+        
+      </>
     )
 }
 

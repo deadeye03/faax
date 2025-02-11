@@ -2,8 +2,11 @@
 import React, { useEffect, useState } from 'react'
 import { colletionImage } from './Collection'
 import { FiHeart } from 'react-icons/fi'
+import Link from 'next/link'
+import Image from 'next/image'
 function TopCollection() {
     const [products,setProducts]=useState([]);
+    
     useEffect(()=>{
         fetch('https://dummyjson.com/products')
             .then(res => res.json())
@@ -18,10 +21,10 @@ function TopCollection() {
                 {/* <div className='h-[200px] w-[200px] md:h-[270px] md:w-[300px]'> */}
                 {Array.from({ length: colletionImage.length }, (_, i) => {
                     return (
-                        <div key={i} className='flex-shrink-0 '>
+                        <Link href={`/categories/t-shirt/${products[i]?.id}`} key={i} className='flex-shrink-0 '>
                             <div className=' relative h-[200px] w-[200px] md:w-[270px] md:h-[300px] rounded-xl'>
-                                <img src={`/img/${colletionImage[i]}`} className='w-full h-full object-cover rounded-xl' alt="fashion-image" />
-                                <FiHeart className='h-4 w-4 absolute top-2 right-2' />
+                                <Image src={`/img/${colletionImage[i]}`} height={200} width={200} className='w-full h-full object-cover object-top rounded-xl' alt="fashion-image" />
+                                <FiHeart className='h-4 w-4 absolute top-2 right-2 text-white ' />
                             </div>
                             <div className='p-1 box-border overflow-hidden'>
                             <h3 className='w-[200px]  font-semibold text-lg text-black text-opacity-70 md:w-full '>{products[i]?.title}</h3>
@@ -32,7 +35,7 @@ function TopCollection() {
                             <p className='text-green-500'>$ {Math.round((products[i]?.price)-(products[i]?.discountPercentage % 100 * products[i]?.price)).toFixed(2) } </p>
                             </div>
                             </div>
-                        </div>
+                        </Link>
                     )
                 })}
             </div>
