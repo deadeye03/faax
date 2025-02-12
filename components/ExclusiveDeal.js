@@ -25,7 +25,7 @@ function ExclusiveDeal() {
             {Array.from({ length: 4 }, (_, i) => {
                 return (
                     <div key={i} className='hidden md:block bg-red-400 rounded-md flex-1'>
-                        <img src={`img/${cardImage[i]}`} className='' alt="" />
+                        <img src={`img/${cardImage[i]}`} className='rounded-md' alt="" />
                     </div>
                 );
             })}

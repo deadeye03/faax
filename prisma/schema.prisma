@@ -1,0 +1,292 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String           @id @default(auto()) @map("_id") @db.ObjectId
+  clerkId        String           @unique
+  email          String
+  name           String
+  phoneNumber    String
+  orders         Order[]
+  address        Address[]
+  reviews        Review[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  Payments       Payment[]
+  ReturnExchange ReturnExchange[]
+}
+
+model Address {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @db.ObjectId
+  user        User     @relation(fields: [userId], references: [id])
+  name        String
+  streetName  String
+  city        String   @default("PATNA")
+  state       String   @default("BIHAR")
+  pinCode     String
+  landmark    String
+  phoneNumber String
+  country     String   @default("INDIA")
+  orders      Order[]
+  createdAt   DateTime @default(now())
+}
+
+model Categories {
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  category String[]
+}
+
+model Product {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String
+  category    String
+  fabric      String
+  color       String
+  gender      String
+  brand       String
+  price       Int
+  discount    Float
+  // This Sizes for T-shirt , shirt, hoodie
+  s_size      Int
+  m_size      Int
+  l_size      Int
+  xl_size     Int
+  rating      Float
+  images      String[]
+  tags        String[]
+  reviews     Review[]
+  orderItem   OrderItem[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([category, gender]) // Compound index for queries using category and gender
+  @@index([category, gender, id]) // Compound index for queries using category, gender, and id
+  @@index([category, gender, price])
+  @@index([category, id])
+}
+
+model OrderItem {
+  id             String           @id @default(auto()) @map("_id") @db.ObjectId
+  orderId        String           @db.ObjectId
+  order          Order            @relation(fields: [orderId], references: [id])
+  productId      String           @db.ObjectId
+  product        Product          @relation(fields: [productId], references: [id])
+  name           String
+  price          Float
+  quantity       Int
+  color          String
+  size           String
+  category       String
+  image          String
+  ReturnExchange ReturnExchange[]
+  status         OrderItemStatus  @default(DELIVERED) // Individual item status (e.g., RETURNED, EXCHANGED)
+  createdAt      DateTime         @default(now())
+}
+
+model Order {
+  id               String           @id @default(auto()) @map("_id") @db.ObjectId
+  userId           String           @db.ObjectId
+  user             User             @relation(fields: [userId], references: [id])
+  total            Float
+  status           Status           @default(PENDING)
+  isTrial          Boolean
+  deliveryAgentId  String?          @db.ObjectId
+  deliveryAgent    DeliveryAgent?   @relation(fields: [deliveryAgentId], references: [id])
+  paymentMethod    PaymentMethod
+  paymentsId       String?          @db.ObjectId
+  payment          Payment[]
+  paymentDone      Boolean          @default(false)
+  orderItems       OrderItem[]
+  itemsQuantity    Int?
+  addressId        String           @db.ObjectId
+  address          Address          @relation(fields: [addressId], references: [id])
+  ReturnExchange   ReturnExchange[]
+  createdAt        DateTime         @default(now())
+  confirmedAt      DateTime?
+  outForDeliveryAt DateTime?
+  deliveredAt      DateTime?
+  cancelledAt      DateTime?
+}
+
+model ReturnExchange {
+  id          String               @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String               @db.ObjectId
+  user        User                 @relation(fields: [userId], references: [id]) // Reference to the user
+  orderId     String               @db.ObjectId
+  order       Order                @relation(fields: [orderId], references: [id]) // Reference to the order
+  orderItemId String               @db.ObjectId
+  orderItem   OrderItem            @relation(fields: [orderItemId], references: [id]) // Reference to the specific order item
+  type        RequestType // Return or Exchange
+  reason      ReasonType // Reason for return or exchange
+  status      ReturnExchangeStatus @default(PENDING) // Current status of the request
+  description String? // Optional detailed description of the reason
+  approvedAt  DateTime? // Date when the request was approved
+  processedAt DateTime? // Date when the request was processed (shipped back)
+  completedAt DateTime? // Date when the return/exchange was completed
+  rejectedAt  DateTime? // Date when the return/exchange was completed
+  createdAt   DateTime             @default(now()) // When the request was created
+}
+
+model Payment {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String        @db.ObjectId
+  user          User          @relation(fields: [userId], references: [id])
+  amount        Float
+  order         Order         @relation(fields: [orderId], references: [id])
+  orderId       String        @db.ObjectId
+  paymentStatus PaymentStatus @default(PENDING)
+  razorpayId    String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+// Status of return/exchange request
+enum ReturnExchangeStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PROCESSING
+  COMPLETED
+}
+
+enum OrderItemStatus {
+  DELIVERED
+  RETURNED
+  EXCHANGED
+  // APPROVED
+  // PICKUP
+  PENDING_RETURN
+  PENDING_EXCHANGE
+}
+
+// Reason for return or exchange
+enum ReasonType {
+  DAMAGED
+  WRONG_ITEM
+  SIZE_FIT_ISSUE
+  CHANGED_MIND
+  COLOR_ISSUE
+  OTHER
+}
+
+enum RequestType {
+  RETURN
+  EXCHANGE
+}
+
+model Review {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String  @db.ObjectId
+  user      User    @relation(fields: [userId], references: [id])
+  productId String  @db.ObjectId
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+model PinCode {
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  pincode String[]
+}
+
+enum Status {
+  PENDING
+  CONFIRMED
+  OutForDelivery
+  COMPLETED
+  CANCELLED
+}
+
+enum Mode {
+  FAST
+  STANDARD
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  ONLINE
+}
+
+enum PaymentStatus {
+  PENDING
+  FAILED
+  SUCCESS
+}
+
+//Delivery Agent  SCHEMAS
+
+model DeliveryAgent {
+  id              String     @id @default(auto()) @map("_id") @db.ObjectId
+  clerkId         String     @unique
+  name            String
+  phoneNumber     String
+  email           String     @unique
+  address         String?
+  isAvailable     Boolean    @default(true)
+  totalDeliveries Int        @default(0)
+  totalEarnings   Float      @default(0)
+  ratings         Float      @default(0)
+  orders          Order[]
+  deliveries      Delivery[]
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+}
+
+model Delivery {
+  id                   String         @id @default(auto()) @map("_id") @db.ObjectId
+  orderId              String // Reference to the order in the e-commerce database
+  deliveryAgent        DeliveryAgent? @relation(fields: [deliveryAgentId], references: [id])
+  deliveryAgentId      String?        @db.ObjectId
+  status               DeliveryStatus @default(ASSIGNED)
+  deliveryAddress      String
+  deliveryMode         String
+  customerName         String
+  phoneNumber          String
+  expectedDeliveryTime DateTime?
+  actualDeliveryTime   DateTime?
+  customerSignature    String?
+  deliveryNotes        String?
+  orderSummary         OrderSummary
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+}
+
+type OrderSummary {
+  totalAmount   Float
+  itemsQuantity Int
+  paymentMethod String
+  orderItems    OrderItemSummary[]
+}
+
+type OrderItemSummary {
+  productId String
+  name      String
+  price     Float
+  quantity  Int
+  color     String
+  size      String
+  category  String
+  image     String
+}
+
+enum DeliveryStatus {
+  ASSIGNED
+  PICKED_UP
+  IN_TRANSIT
+  DELIVERED
+  FAILED
+  RETURNED
+}
