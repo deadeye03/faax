@@ -33,7 +33,7 @@ export default function MenClothingMenu({closeMenu}) {
             <h2 className="text-pink-500 font-semibold mb-2">{section.category}</h2>
             <div className="space-y-1 flex flex-col">
               {section.items.map((item, itemIndex) => (
-                <Link href={`${process.env.NEXT_PUBLIC_URL}/categories/${item.toLowerCase()}`}
+                <Link href={`/categories/${item.toLowerCase()}`}
                   key={itemIndex} 
                   className="hover:font-bold transition-all duration-200 cursor-pointer"
                   onClick={()=>closeMenu()}
